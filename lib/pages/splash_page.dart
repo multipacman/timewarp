@@ -1,6 +1,13 @@
 // ignore_for_file: prefer_const_constructors
 import 'package:flutter/material.dart';
 
+// Packages
+import 'package:firebase_core/firebase_core.dart';
+import 'package:get_it/get_it.dart';
+
+// Pages
+import '../services/navigation_services.dart';
+
 class SplashPage extends StatefulWidget {
   final VoidCallback onInitializationComplete;
 
@@ -19,6 +26,9 @@ class _SplahPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
+    _setup().then(
+      (value) => widget.onInitializationComplete(),
+    );
   }
 
   @override
@@ -43,6 +53,18 @@ class _SplahPageState extends State<SplashPage> {
           ),
         ),
       ),
+    );
+  }
+
+  Future<void> _setup() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    await Firebase.initializeApp();
+    _registerServices();
+  }
+
+  void _registerServices() {
+    GetIt.instance.registerSingleton<NavigationService>(
+      NavigationService(),
     );
   }
 }
