@@ -29,8 +29,13 @@ class _SplahPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
-    _setup().then(
-      (value) => widget.onInitializationComplete(),
+
+    Future.delayed(Duration(seconds: 1)).then(
+      (value) => {
+        _setup().then(
+          (_) => widget.onInitializationComplete(),
+        )
+      },
     );
   }
 
