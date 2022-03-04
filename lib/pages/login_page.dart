@@ -1,9 +1,17 @@
 // Packages
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import 'package:provider/provider.dart';
 
 // Widgets
 import '../widgets/custom_input_fields.dart';
 import '../widgets/round_button.dart';
+
+// Providers
+import '../providers/authentication_provider.dart';
+
+// Services
+import '../services/navigation_services.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -15,13 +23,20 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   late double _deviceHeight;
   late double _deviceWidth;
+  late AuthenticationProvider _auth;
+  late NavigationService _navigation;
 
   final _loginFormKey = GlobalKey<FormState>();
+
+  String? _email;
+  String? _password;
 
   @override
   Widget build(BuildContext context) {
     _deviceHeight = MediaQuery.of(context).size.height;
     _deviceWidth = MediaQuery.of(context).size.width;
+    _auth = Provider.of<AuthenticationProvider>(context);
+    _navigation = GetIt.instance.get<NavigationService>();
     return _buildUI();
   }
 
@@ -69,7 +84,7 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget _loginForm() {
     return Container(
-      height: _deviceHeight * 0.18,
+      height: _deviceHeight * 0.20,
       child: Form(
         key: _loginFormKey,
         child: Column(
@@ -79,13 +94,13 @@ class _LoginPageState extends State<LoginPage> {
           children: [
             CustomTextFormField(
               onSaved: (_value) {},
-              regEx: 'regEx',
+              regEx: '[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+',
               hintText: 'Email',
               obscureText: false,
             ),
             CustomTextFormField(
               onSaved: (_value) {},
-              regEx: 'regEx',
+              regEx: "sd",
               hintText: 'Password',
               obscureText: true,
             ),
@@ -100,7 +115,13 @@ class _LoginPageState extends State<LoginPage> {
       name: 'Login',
       height: _deviceHeight * 0.065,
       width: _deviceWidth * 0.65,
-      onPressed: () {},
+      onPressed: () {
+        if (_loginFormKey.currentState!.validate()) {
+          print("email is $_email, Pass is $_password");
+          _loginFormKey.currentState!.save();
+          print("email is $_email, Pass is $_password");
+        }
+      },
     );
   }
 

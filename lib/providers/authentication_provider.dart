@@ -16,5 +16,26 @@ class AuthenticationProvider extends ChangeNotifier {
     _auth = FirebaseAuth.instance;
     _navigationService = GetIt.instance.get<NavigationService>();
     _databaseService = GetIt.instance.get<DatabaseService>();
+
+    _auth.authStateChanges().listen((_user) {
+      if (_user != null) {
+        _databaseService.updateUserLastSeenTime(_user.uid);
+        _databaseService.getUser(_user.uid);
+      } else {
+        print("not Authenticated");
+      }
+    });
+  }
+
+  Future<void> loginUsingEmailAndPassword(
+      String _email, String _password) async {
+    try {
+      await _auth.signInWithEmailAndPassword(
+          email: _email, password: _password);
+    } on FirebaseAuthException {
+      print('Error loggin user into firebase');
+    } catch (e) {
+      print(e);
+    }
   }
 }
