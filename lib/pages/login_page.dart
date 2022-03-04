@@ -93,14 +93,22 @@ class _LoginPageState extends State<LoginPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             CustomTextFormField(
-              onSaved: (_value) {},
+              onSaved: (_value) {
+                setState(() {
+                  _email = _value;
+                });
+              },
               regEx: '[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+',
               hintText: 'Email',
               obscureText: false,
             ),
             CustomTextFormField(
-              onSaved: (_value) {},
-              regEx: "sd",
+              onSaved: (_value) {
+                setState(() {
+                  _password = _value;
+                });
+              },
+              regEx: r".{4,}",
               hintText: 'Password',
               obscureText: true,
             ),
