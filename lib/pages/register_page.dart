@@ -28,9 +28,23 @@ class _RegisterPageState extends State<RegisterPage> {
   late double _deviceHeight;
   late double _deviceWidth;
 
+  late AuthenticationProvider _auth;
+  late DatabaseService _db;
+  late CloudStorageService _cloudStorageService;
+
+  String? _email;
+  String? _password;
+  String? _name;
+
   PlatformFile? _profileImage;
+
+  final _registerFormKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
+    _auth = Provider.of<AuthenticationProvider>(context);
+    _db = GetIt.instance.get<DatabaseService>();
+    _cloudStorageService = GetIt.instance.get<CloudStorageService>();
     _deviceHeight = MediaQuery.of(context).size.height;
     _deviceWidth = MediaQuery.of(context).size.width;
     return _buildUI();
@@ -50,6 +64,17 @@ class _RegisterPageState extends State<RegisterPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             _profileImageField(),
+            SizedBox(
+              height: _deviceHeight * 0.05,
+            ),
+            _registerForm(),
+            SizedBox(
+              height: _deviceHeight * 0.05,
+            ),
+            _registerButton(),
+            SizedBox(
+              height: _deviceHeight * 0.02,
+            ),
           ],
         ),
       ),
@@ -60,6 +85,7 @@ class _RegisterPageState extends State<RegisterPage> {
     return GestureDetector(
       onTap: () {
         GetIt.instance.get<MediaService>().pickImageFromLibrary().then((_file) {
+          print(_file?.path);
           setState(() {
             _profileImage = _file;
           });
@@ -80,6 +106,70 @@ class _RegisterPageState extends State<RegisterPage> {
           );
         }
       }(),
+    );
+  }
+
+  Widget _registerForm() {
+    return Container(
+      height: _deviceHeight * 0.35,
+      child: Form(
+        key: _registerFormKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            CustomTextFormField(
+                onSaved: (_value) {
+                  setState(() {
+                    _name = _value;
+                  });
+                },
+                regEx: r".{4,}",
+                hintText: "Name",
+                obscureText: false),
+            CustomTextFormField(
+                onSaved: (_value) {
+                  setState(() {
+                    _email = _value;
+                  });
+                },
+                regEx: '[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+',
+                hintText: "Email",
+                obscureText: false),
+            CustomTextFormField(
+                onSaved: (_value) {
+                  setState(() {
+                    _password = _value;
+                  });
+                },
+                regEx: r".{4,}",
+                hintText: "Password",
+                obscureText: true)
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _registerButton() {
+    return RoundedButton(
+      name: "Register",
+      height: _deviceHeight * 0.065,
+      width: _deviceWidth * 0.65,
+      onPressed: () async {
+        if (_registerFormKey.currentState!.validate() &&
+            _profileImage != null) {
+          _registerFormKey.currentState!.save();
+          String? _uid =
+              await _auth.registerUserEmailAndPassword(_email!, _password!);
+
+          String? _imageURL = await _cloudStorageService.saveUserImageToStorage(
+              _uid!, _profileImage!);
+
+          await _db.createUser(_uid, _email!, _name!, _imageURL!);
+        }
+      },
     );
   }
 }
